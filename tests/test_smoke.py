@@ -5,11 +5,12 @@ import taverngym
 
 def test_versions_match_card_data():
     # The card table uses the pinned 37.0.2 client data and server overlay
-    # (tools/overlays/37.0.2.json).
+    # (tools/overlays/37.0.2.json), then the 37.0.3 server hotfix (tools/overlays/37.0.3.json).
     root = taverngym.REPO_ROOT
     meta = json.loads((root / "tools" / "overlays" / "37.0.2.json").read_text())["meta"]
+    hotfix = json.loads((root / "tools" / "overlays" / "37.0.3.json").read_text(encoding="utf-8"))["meta"]
     assert taverngym.game_version() == meta["client_version"] == "37.0.2.256589"
-    assert taverngym.server_rules_version() == meta["server_patch"]
+    assert taverngym.server_rules_version() == hotfix["server_patch"] == "37.0.3"
     assert taverngym.version()
 
 

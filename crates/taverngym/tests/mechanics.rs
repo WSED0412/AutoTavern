@@ -5166,7 +5166,7 @@ fn effect_casts_are_not_your_casts() {
 fn cast_without_this_is_your_cast() {
     // "cast X" on a card (no "this casts") is a spell you cast. Veteran Brigand: "Choose One - This
     // plays 3 Blood Gems on all your minions; or cast Blood Gem Barrage 3 times." Felboar: "After
-    // you cast 3 spells, consume a minion in the Tavern to gain its stats."
+    // you cast 4 spells, consume a minion in the Tavern to gain its stats." (37.0.3)
     for (opt, casts) in [(0, 0), (1, 3)] {
         let mut g = game(8401);
         g.players[0].tier = 6;
@@ -5178,9 +5178,9 @@ fn cast_without_this_is_your_cast() {
         g.apply(0, Action::Choose(opt)).unwrap();
         let st = &g.players[0].stats;
         assert_eq!((st.spells_cast, st.tavern_spells_cast), (casts, casts));
-        // The Felboar ate one Tavern minion after the third Barrage only.
-        let ate = shop - g.players[0].shop.len();
-        assert_eq!(ate, if casts == 3 { 1 } else { 0 }, "option {opt}");
+        // The Barrages count toward the Felboar (3 of 4: nothing eaten yet).
+        assert_eq!(g.players[0].board[0].counter, casts, "option {opt}");
+        assert_eq!(g.players[0].shop.len(), shop, "option {opt}");
         if casts == 0 {
             // "This plays" Blood Gems: +3/+3 on the Felboar, nothing counted.
             assert_eq!(stats(&g, 0)[0], (before.0 + 3, before.1 + 3));
@@ -9048,7 +9048,7 @@ fn whenever_listeners_act_before_the_spell_and_the_battlecry() {
     assert!(acts_whenever(ev::SPELL_CAST, cid("BG36_108"))); // Vicious Mindslasher
     assert!(acts_whenever(ev::SPELL_CAST, cid("BG27_005_G")));
     assert!(!acts_whenever(ev::SPELL_CAST, cid("BG36_MagicItem_404"))); // Corrupted Baton
-    assert!(!acts_whenever(ev::SPELL_CAST, cid("BG28_633"))); // Felboar: "After you cast 3"
+    assert!(!acts_whenever(ev::SPELL_CAST, cid("BG28_633"))); // Felboar: "After you cast 4"
     assert!(acts_whenever(ev::CARD_PLAYED, cid("BG30_MagicItem_900"))); // Dragonwing Glider
     assert!(acts_whenever(
         ev::CARD_PLAYED,

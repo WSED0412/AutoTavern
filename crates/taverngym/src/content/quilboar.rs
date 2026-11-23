@@ -152,12 +152,13 @@ pub fn scripts() -> Vec<(&'static str, Script)> {
                 ..E
             },
         ),
-        // Sanguine Champion: Battlecry and Deathrattle: Blood Gems give an extra +2/+1 (+4/+2).
+        // Sanguine Champion: Battlecry and Deathrattle: Blood Gems give an extra +1/+1 (+2/+2;
+        // +2/+1 and +4/+2 before 37.0.3).
         (
             "BG23_017",
             Script {
-                battlecry: Some(|c, me, _| gem_bonus(c, me.side, 2 * me.g(), me.g())),
-                deathrattle: Some(|c, me| gem_bonus(c, me.side, 2 * me.g(), me.g())),
+                battlecry: Some(|c, me, _| gem_bonus(c, me.side, me.g(), me.g())),
+                deathrattle: Some(|c, me| gem_bonus(c, me.side, me.g(), me.g())),
                 ..E
             },
         ),

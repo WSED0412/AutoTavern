@@ -787,6 +787,51 @@ pub fn window_gifts(c: &Ctx) -> Vec<CardId> {
         .collect()
 }
 
+/// 37.0.3: after Turn 9, Dark Gift Discovers offer these only when they match your most
+/// common minion type.
+pub const LATE_TYPE_ONLY: [&str; 4] = [
+    "BG36_356", // Tyrael
+    "BG35_342", // Falling Sky Golem
+    "BG35_123", // Cataclysmic Harbinger
+    "BG36_102", // De-volition-ist
+];
+
+/// Whether a Dark Gift Discover on this turn may offer `def` (`LATE_TYPE_ONLY`). "Your most
+/// common minion type" is counted over the living warband in the lobby's types, as
+/// `Ctx::most_common_race`; a tie allows each tied type (no randomness is used). A minion with
+/// no type (Tyrael, Cataclysmic Harbinger) never matches.
+pub fn late_gift_ok(c: &Ctx, side: Side, def: &crate::cards::CardDef) -> bool {
+    if c.g.turn <= 9 {
+        return true;
+    }
+    let normal = db().get(db().normal_of(def.cid)).id.as_str();
+    if !LATE_TYPE_ONLY.contains(&normal) {
+        return true;
+    }
+    let races: Vec<Races> = c.boards[side]
+        .iter()
+        .filter(|m| m.alive())
+        .map(|m| m.races)
+        .collect();
+    let lobby = c.g.lobby_races;
+    let mut present = Races::NONE;
+    for r in &races {
+        if *r != Races::ALL {
+            present = Races(present.0 | (r.0 & lobby.0));
+        }
+    }
+    let counts: Vec<(Races, usize)> = present
+        .iter()
+        .map(|t| (t, races.iter().filter(|r| r.intersects(t)).count()))
+        .collect();
+    let Some(best) = counts.iter().map(|x| x.1).max() else {
+        return false;
+    };
+    counts
+        .iter()
+        .any(|(t, n)| *n == best && super::goes_with_type(def, *t))
+}
+
 /// Up to `n` Discover options: distinct minions from `cands`, each with a different Dark Gift from
 /// `gifts` that fits it (`gift_fits`). The first option is of type `first_race` when possible (the
 /// most-common-type guarantee). `golden`: Golden, without a Triple Reward. Offer weight of `gift`
@@ -839,7 +884,11 @@ pub fn slotted_gift_options(
     let d = db();
     let turn = c.g.turn;
     let lowest = slots.iter().map(|s| s.0).min().unwrap_or(0);
-    let mut cands: Vec<CardId> = cands.to_vec();
+    let mut cands: Vec<CardId> = cands
+        .iter()
+        .copied()
+        .filter(|x| late_gift_ok(c, side, d.get(*x)))
+        .collect();
     let mut gifts: Vec<CardId> = gifts.to_vec();
     c.g.rng.shuffle(&mut cands);
     c.g.rng.shuffle(&mut gifts);
@@ -911,7 +960,11 @@ pub fn gifted_options_with(
     let d = db();
     let turn = c.g.turn;
     let lowest = cands.iter().map(|x| d.get(*x).tier).min().unwrap_or(0);
-    let mut cands: Vec<CardId> = cands.to_vec();
+    let mut cands: Vec<CardId> = cands
+        .iter()
+        .copied()
+        .filter(|x| late_gift_ok(c, side, d.get(*x)))
+        .collect();
     let mut gifts: Vec<CardId> = gifts.to_vec();
     c.g.rng.shuffle(&mut cands);
     c.g.rng.shuffle(&mut gifts);

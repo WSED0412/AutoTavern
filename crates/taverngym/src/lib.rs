@@ -1,6 +1,6 @@
 #![recursion_limit = "256"]
 //! TavernGym: a Hearthstone Battlegrounds solo-mode simulator engine (client 37.0.2.256589,
-//! server rules 37.0.2) with a reinforcement-learning interface.
+//! server rules 37.0.3) with a reinforcement-learning interface.
 //!
 //! Module map:
 //! - `cards`   static card database (`data/cards.json`)
@@ -49,7 +49,7 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 /// Hearthstone client build the simulator replicates.
 pub const GAME_VERSION: &str = "37.0.2.256589";
 /// Server-side rule overlay applied on top of the client data.
-pub const SERVER_RULES_VERSION: &str = "37.0.2";
+pub const SERVER_RULES_VERSION: &str = "37.0.3";
 
 #[cfg(test)]
 mod tests {
@@ -58,7 +58,7 @@ mod tests {
     #[test]
     fn versions() {
         assert_eq!(GAME_VERSION, "37.0.2.256589");
-        assert_eq!(SERVER_RULES_VERSION, "37.0.2");
+        assert_eq!(SERVER_RULES_VERSION, "37.0.3");
         assert!(!VERSION.is_empty());
     }
 }

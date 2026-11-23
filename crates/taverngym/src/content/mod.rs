@@ -25,8 +25,8 @@ mod dragons;
 mod elementals;
 mod gifts;
 pub use gifts::{
-    TRASTATH_GIFTS as TRASTATH_GIFT_IDS, gift_fits, gift_init, gifted_options, gifted_options_with,
-    slotted_gift_options, window_gifts,
+    LATE_TYPE_ONLY, TRASTATH_GIFTS as TRASTATH_GIFT_IDS, gift_fits, gift_init, gifted_options,
+    gifted_options_with, late_gift_ok, slotted_gift_options, window_gifts,
 };
 mod hero_powers;
 mod heroes;

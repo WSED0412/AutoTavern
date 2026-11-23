@@ -21,8 +21,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUNDLE = Path(os.environ.get("TAVERNGYM_BUNDLE", ROOT / "content_pack"))
 OUT = ROOT / "crates" / "taverngym" / "data" / "cards.json"
-# Patch overlay (37.0.2) on top of the read-only 253216 / 36.6.1 resource pack.
-OVERLAY = ROOT / "tools" / "overlays" / "37.0.2.json"
+# Patch overlays (37.0.2, then the 37.0.3 server hotfix) on top of the read-only 253216 / 36.6.1
+# resource pack, applied in order.
+OVERLAYS = [ROOT / "tools" / "overlays" / f"{v}.json" for v in ("37.0.2", "37.0.3")]
 
 KINDS = {
     "minion": "minion",
@@ -283,8 +284,9 @@ def main():
     if not (BUNDLE / "data" / "catalogue.jsonl").is_file():
         sys.exit(f"no resource bundle at {BUNDLE} (pass --bundle DIR or set TAVERNGYM_BUNDLE)")
     db = build()
-    if OVERLAY.exists():
-        db = apply_overlay(db, json.loads(OVERLAY.read_text(encoding="utf-8")))
+    for overlay in OVERLAYS:
+        if overlay.exists():
+            db = apply_overlay(db, json.loads(overlay.read_text(encoding="utf-8")))
     db = finish(db)
     text = render(db)
     if "--check" in sys.argv:
