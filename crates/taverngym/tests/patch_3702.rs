@@ -124,28 +124,30 @@ fn kiri_batteries_have_two_independent_purchases_each_and_reset_next_turn() {
 #[test]
 fn stand_and_greater_kiri_keep_three_distinct_growing_instances() {
     let mut g = fixture(370203);
-    let gauntlet = cid("BG36_MagicItem_414");
-    g.trinket_universe = vec![gauntlet];
+    // Transcribing Typewriter (4): Kiri offers Greater Trinkets costing (4) or less, and 37.0.3
+    // raised Weighted Gauntlet, the trinket used here before, to (5).
+    let typewriter = cid("BG35_MagicItem_931t");
+    g.trinket_universe = vec![typewriter];
     trinket(&mut g, "BG30_MagicItem_888");
     buy_trinket(&mut g, "BG36_MagicItem_412t2");
     assert_eq!(g.players[0].pending.len(), 2);
-    choose_id(&mut g, "BG36_MagicItem_414");
+    choose_id(&mut g, "BG35_MagicItem_931t");
     // The other Kiri menu was generated before either purchase and remains payable.
-    choose_id(&mut g, "BG36_MagicItem_414");
+    choose_id(&mut g, "BG35_MagicItem_931t");
     let copies: Vec<_> = g.players[0].trinket_effects().collect();
     assert_eq!(copies.len(), 3);
-    assert!(copies.iter().all(|card| card.base() == gauntlet));
+    assert!(copies.iter().all(|card| card.base() == typewriter));
     let unique: std::collections::HashSet<_> = copies.iter().collect();
     assert_eq!(unique.len(), 3);
     for card in &copies {
-        assert_eq!(db().get(*card).cid, gauntlet);
+        assert_eq!(db().get(*card).cid, typewriter);
     }
     // A serializer round trip preserves every instance key.
     g = serde_json::from_str(&serde_json::to_string(&g).unwrap()).unwrap();
     assert_eq!(g.players[0].trinket_effects().collect::<Vec<_>>(), copies);
     g.with_recruit(0, |c| {
         for (i, card) in copies.iter().enumerate() {
-            c.set_card_data(0, *card, 7 << i);
+            c.set_card_data(0, *card, i as i32 + 1);
         }
     });
     for (i, card) in copies.iter().enumerate() {
@@ -159,7 +161,7 @@ fn stand_and_greater_kiri_keep_three_distinct_growing_instances() {
             };
             taverngym::script::script(*card).unwrap().shown.unwrap()(c, &state)
         });
-        assert_eq!(shown, vec![7 << i, 7 << i]);
+        assert_eq!(shown, vec![4, i as i32 + 1]);
     }
 }
 
