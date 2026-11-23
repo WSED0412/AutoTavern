@@ -205,7 +205,13 @@ fn felboar_and_faceless_converter_count_spells() {
         give(&mut g, "BG28_897");
         cast_on(&mut g, 3);
     }
-    assert_eq!(board_text(&mut g, 0), None, "it fired: 3 left again");
+    assert_eq!(
+        board_text(&mut g, 0),
+        txt(
+            "After you cast 4 spells, consume a minion in the Tavern to gain its stats. \
+             (1 left!)"
+        )
+    );
     assert_eq!(
         board_text(&mut g, 1),
         txt(
@@ -213,6 +219,9 @@ fn felboar_and_faceless_converter_count_spells() {
              this game!)"
         )
     );
+    give(&mut g, "BG28_897");
+    cast_on(&mut g, 3);
+    assert_eq!(board_text(&mut g, 0), None, "it fired: 4 left again");
 }
 
 #[test]
