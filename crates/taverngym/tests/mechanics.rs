@@ -3088,9 +3088,10 @@ fn hero_offer_policy() {
             .intersects(taverngym::types::Races::ABERRATION);
         for (id, want) in [
             ("BG36_HERO_000", usize::from(aberrations)),
+            // Kith'ix (Undead): only with Aberrations too (37.0.3).
             (
                 "BG36_HERO_002",
-                usize::from(g.lobby_races.intersects(Races::UNDEAD)),
+                usize::from(aberrations && g.lobby_races.intersects(Races::UNDEAD)),
             ),
         ] {
             assert_eq!(
